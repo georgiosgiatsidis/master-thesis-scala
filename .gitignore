@@ -1,0 +1,25 @@
+# sbt
+dist/*
+target/
+lib_managed/
+src_managed/
+project/
+.history
+.cache
+.lib/
+
+# IntelliJ
+*.log
+*.iml
+*.ipr
+*.iws
+.idea
+
+# Other
+.DS_Store
+.history
+.scala_dependencies
+.cache
+.cache-main
+*.class
+output
