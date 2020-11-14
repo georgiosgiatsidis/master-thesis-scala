@@ -23,7 +23,14 @@ object Tables extends JdbcProfile {
 
   val users = TableQuery[Users]
 
-  case class Tweet(id: Long, fullText: String, location: Option[String] = None, sentiment: String, createdAt: String, userId: Long)
+  case class Tweet(
+                    id: Long,
+                    fullText: String,
+                    location: Option[String] = None,
+                    sentiment: String,
+                    createdAt: String,
+                    userId: Option[Long] = None,
+                  )
 
   class Tweets(tag: Tag) extends Table[Tweet](tag, "tweets") {
 
@@ -31,19 +38,19 @@ object Tables extends JdbcProfile {
 
     def fullText: Rep[String] = column[String]("full_text")
 
-    def location: Rep[String] = column[String]("location")
+    def location: Rep[Option[String]] = column[Option[String]]("location")
 
     def sentiment: Rep[String] = column[String]("sentiment")
 
     def createdAt: Rep[String] = column[String]("created_at")
 
-    def userId: Rep[Long] = column[Long]("user_id")
+    def userId: Rep[Option[Long]] = column[Option[Long]]("user_id")
 
     def user: ForeignKeyQuery[Users, User] =
-      foreignKey("user_fk", userId, users)(_.id, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
+      foreignKey("user_fk", userId, users)(_.id.?, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
 
     def * : ProvenShape[Tweet] =
-      (id, fullText, location.?, sentiment, createdAt, userId) <> (Tweet.tupled, Tweet.unapply)
+      (id, fullText, location, sentiment, createdAt, userId) <> (Tweet.tupled, Tweet.unapply)
   }
 
   val tweets = TableQuery[Tweets]
