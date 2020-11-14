@@ -1,6 +1,9 @@
 package com.giatsidis.spark
 
+import java.sql.DriverManager
+
 import com.giatsidis.spark.models.{Tweet, User}
+import com.giatsidis.spark.services.MysqlService
 import com.giatsidis.spark.utils.{OAuthUtils, SentimentAnalysisUtils, TextUtils}
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.StreamingContext
@@ -39,11 +42,18 @@ object Main {
             status.getLang,
             SentimentAnalysisUtils.detectSentiment(cleanedText).toString
           )
-        }).foreach(m => {
-        val jedis = new Jedis(Config.redisHost, Config.redisPort)
-        val pipeline = jedis.pipelined
-        pipeline.publish(Config.redisChannel, Serialization.write(m))
-        pipeline.sync()
+        })
+
+      // save to MySQL
+      savedRdd.foreachPartition(MysqlService.save(_))
+      // publish to Redis
+      savedRdd.foreachPartition(partition => {
+        partition.foreach(m => {
+          val jedis = new Jedis(Config.redisHost, Config.redisPort)
+          val pipeline = jedis.pipelined
+          pipeline.publish(Config.redisChannel, Serialization.write(m))
+          pipeline.sync()
+        })
       })
     }
 

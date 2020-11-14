@@ -4,7 +4,7 @@ import java.sql.{DriverManager, PreparedStatement}
 
 import com.giatsidis.spark.Config
 import com.giatsidis.spark.models.Tweet
-import org.apache.log4j.{Level, Logger}
+import org.apache.log4j.{Logger}
 
 object MysqlService extends Serializable {
 
