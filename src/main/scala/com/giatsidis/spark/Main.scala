@@ -47,7 +47,7 @@ object Main {
         })
 
       // save to MySQL
-      savedRdd.foreachPartition(MysqlService.save(_))
+      MysqlService.save(savedRdd)
       // publish to Redis
       savedRdd.foreachPartition(partition => {
         partition.foreach(m => {
