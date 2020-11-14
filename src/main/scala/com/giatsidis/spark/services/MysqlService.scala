@@ -11,18 +11,24 @@ object MysqlService extends Serializable {
   @transient lazy val log = Logger.getLogger(this.getClass)
 
   def save(partition: Iterator[Tweet]) = {
-    Class.forName("com.mysql.jdbc.Driver").newInstance
+    Class.forName("com.mysql.jdbc.Driver")
     val connection = DriverManager.getConnection(
       s"jdbc:mysql://${Config.dbHost}:${Config.dbPort}/${Config.dbName}",
       Config.dbUsername,
       Config.dbPassword
     )
 
-    val preparedStatement: PreparedStatement = connection.prepareStatement("INSERT INTO tweets (full_text) VALUES (?)")
+    val sql = "INSERT INTO tweets (id, full_text, location, sentiment, created_at) VALUES (?, ?, ?, ?, ?)"
+    val preparedStatement: PreparedStatement = connection.prepareStatement(sql)
     try {
       connection.setAutoCommit(false)
       partition.foreach(record => {
-        preparedStatement.setString(1, record.fullText)
+        preparedStatement.setLong(1, record.id)
+        preparedStatement.setString(2, record.fullText)
+        preparedStatement.setString(3, if (record.location.isEmpty) null else record.location.get)
+        preparedStatement.setString(4, record.sentiment)
+        preparedStatement.setString(5, record.createdAt)
+
         preparedStatement.addBatch()
       })
       preparedStatement.executeBatch()
