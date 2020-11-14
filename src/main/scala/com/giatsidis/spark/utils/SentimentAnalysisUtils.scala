@@ -64,7 +64,7 @@ object SentimentAnalysisUtils {
 
     //    println("debug: main: " + mainSentiment)
     //    println("debug: avg: " + averageSentiment)
-    println("debug: weighted: " + weightedSentiment)
+    //    println("debug: weighted: " + weightedSentiment)
 
     weightedSentiment match {
       case s if s <= 0.0 => NOT_UNDERSTOOD
