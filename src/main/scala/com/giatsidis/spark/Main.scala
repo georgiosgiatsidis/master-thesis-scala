@@ -20,7 +20,7 @@ object Main {
     val sparkConf = new SparkConf().setAppName("master-thesis-scala").setMaster("local[*]")
     val streamingContext = new StreamingContext(sparkConf, Seconds(Config.streamingBatchDuration))
     streamingContext.sparkContext.setLogLevel("ERROR")
-    val tweets = TwitterUtils.createStream(streamingContext, None, Array("BTC", "ETH", "COVID"))
+    val tweets = TwitterUtils.createStream(streamingContext, None, Array("COVID"))
 
     tweets.foreachRDD { rdd =>
       val savedRdd = rdd
@@ -42,7 +42,7 @@ object Main {
             SentimentAnalysisUtils.detectSentiment(cleanedText).toString,
             status.getCreatedAt.toInstant.toString,
             //            status.getHashtagEntities.toList.map(_.getText),
-            //            User(status.getUser.getScreenName, status.getUser.getProfileImageURLHttps),
+            User(status.getUser.getId, status.getUser.getScreenName, status.getUser.getProfileImageURLHttps),
           )
         })
 

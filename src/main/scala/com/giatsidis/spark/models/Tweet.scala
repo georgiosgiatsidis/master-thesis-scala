@@ -7,5 +7,5 @@ case class Tweet(
                   sentiment: String,
                   createdAt: String,
                   //                  hashtags: List[String],
-                  //                  user: User,
+                  user: User,
                 )

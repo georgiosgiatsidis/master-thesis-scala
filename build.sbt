@@ -8,9 +8,11 @@ val configVersion = "1.4.1"
 val coreNlpVersion = "3.6.0"
 val sparkVersion = "3.0.1"
 val jedisVersion = "3.3.0"
+val slickVersion = "3.3.3"
 
 libraryDependencies ++= Seq(
   "com.typesafe" % "config" % configVersion,
+  "com.typesafe.slick" %% "slick" % slickVersion,
   "edu.stanford.nlp" % "stanford-corenlp" % coreNlpVersion,
   "edu.stanford.nlp" % "stanford-corenlp" % coreNlpVersion classifier "models",
   "mysql" % "mysql-connector-java" % "5.1.12",
