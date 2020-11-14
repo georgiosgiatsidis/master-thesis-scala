@@ -24,7 +24,7 @@ object Main {
 
     tweets.foreachRDD { rdd =>
       val savedRdd = rdd
-        .filter(_.getLang.contains("en"))
+        .filter(_.getLang == "en")
         // Filter retweets
         .filter(!_.isRetweet)
         // Filter tweets with big number of hashtags
@@ -35,17 +35,14 @@ object Main {
           val cleanedText = TextUtils.cleanText(status.getText)
           Tweet(
             status.getId,
-            User(status.getUser.getScreenName, status.getUser.getProfileImageURLHttps),
-            status.getCreatedAt.toInstant.toString,
+            status.getText,
             Option(status.getGeoLocation).map(geo => {
               s"${geo.getLatitude},${geo.getLongitude}"
             }),
-            status.getText,
-            cleanedText,
-            status.getHashtagEntities.toList.map(_.getText),
-            status.getRetweetCount,
-            status.getLang,
-            SentimentAnalysisUtils.detectSentiment(cleanedText).toString
+            SentimentAnalysisUtils.detectSentiment(cleanedText).toString,
+            status.getCreatedAt.toInstant.toString,
+            //            status.getHashtagEntities.toList.map(_.getText),
+            //            User(status.getUser.getScreenName, status.getUser.getProfileImageURLHttps),
           )
         })
 
