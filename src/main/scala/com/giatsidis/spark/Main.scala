@@ -19,13 +19,18 @@ object Main {
     OAuthUtils.init()
     val sparkConf = new SparkConf().setAppName("master-thesis-scala").setMaster("local[*]")
     val streamingContext = new StreamingContext(sparkConf, Seconds(Config.streamingBatchDuration))
-    streamingContext.sparkContext.setLogLevel("OFF")
-    val tweets = TwitterUtils.createStream(streamingContext, None, Array("covid"))
+    streamingContext.sparkContext.setLogLevel("ERROR")
+    val tweets = TwitterUtils.createStream(streamingContext, None, Array("BTC", "ETH", "COVID"))
 
     tweets.foreachRDD { rdd =>
-      rdd
+      val savedRdd = rdd
         .filter(_.getLang.contains("en"))
+        // Filter retweets
         .filter(!_.isRetweet)
+        // Filter tweets with big number of hashtags
+        .filter(_.getHashtagEntities.toList.length < 5)
+        // Filter tweets with short content length
+        .filter(_.getText.length > 20)
         .map(status => {
           val cleanedText = TextUtils.cleanText(status.getText)
           Tweet(
