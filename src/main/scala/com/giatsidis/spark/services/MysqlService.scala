@@ -1,7 +1,7 @@
 package com.giatsidis.spark.services
 
 import com.giatsidis.spark.Config
-import com.giatsidis.spark.Tables.{Tweets, Users, tweets, Tweet => TablesTweet, User => TablesUsers}
+import com.giatsidis.spark.Tables.{Tweets, Users, tweets, Tweet => TablesTweet, User => TablesUser}
 import com.giatsidis.spark.models.Tweet
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.rdd.RDD
@@ -20,18 +20,20 @@ object MysqlService {
   def save(rdd: RDD[Tweet]) = {
     rdd.foreachPartition(partition => {
       val db = Database.forURL(
-        s"jdbc:mysql://localhost:3306/${Config.dbName}",
+        s"jdbc:mysql://${Config.dbHost}:${Config.dbPort}/${Config.dbName}",
         Config.dbUsername,
         Config.dbPassword,
       )
 
       val tweetsToInsert: ArrayBuffer[TablesTweet] = ArrayBuffer()
+      val usersToInsert: ArrayBuffer[TablesUser] = ArrayBuffer()
 
       try {
         partition.foreach {
           record => {
-            val users = TableQuery[Users].insertOrUpdate(TablesUsers(record.user.id, record.user.screenName, record.user.profileImageURLHttps))
-            Await.result(db.run(users), Duration.Inf)
+            usersToInsert +=
+              TablesUser(record.user.id, record.user.screenName, record.user.profileImageURLHttps)
+
             tweetsToInsert +=
               TablesTweet(
                 record.id,
@@ -43,8 +45,11 @@ object MysqlService {
               )
           }
         }
+        val usersSequence = usersToInsert.toList.map(TableQuery[Users].insertOrUpdate(_))
         val tweetsSequence = tweetsToInsert.toList.map(TableQuery[Tweets].insertOrUpdate(_))
+        val usersInserted = Await.result(db.run(DBIO.sequence(usersSequence)), Duration.Inf).sum
         val tweetsInserted = Await.result(db.run(DBIO.sequence(tweetsSequence)), Duration.Inf).sum
+        log.info(s"Inserted ${usersInserted} users")
         log.info(s"Inserted ${tweetsInserted} tweets")
       } catch {
         case e: Exception =>
