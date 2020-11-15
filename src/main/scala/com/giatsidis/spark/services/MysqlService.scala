@@ -1,7 +1,7 @@
 package com.giatsidis.spark.services
 
 import com.giatsidis.spark.Config
-import com.giatsidis.spark.Tables.{Tweets, Users, tweets, Tweet => TablesTweet, User => TablesUser}
+import com.giatsidis.spark.Tables.{Tweets, Users, Tweet => TablesTweet, User => TablesUser}
 import com.giatsidis.spark.models.Tweet
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.rdd.RDD
@@ -46,9 +46,9 @@ object MysqlService {
           }
         }
         val usersSequence = usersToInsert.toList.map(TableQuery[Users].insertOrUpdate(_))
-        val tweetsSequence = tweetsToInsert.toList.map(TableQuery[Tweets].insertOrUpdate(_))
         val usersInserted = Await.result(db.run(DBIO.sequence(usersSequence)), Duration.Inf).sum
-        val tweetsInserted = Await.result(db.run(DBIO.sequence(tweetsSequence)), Duration.Inf).sum
+        val tweetsInserted = Await.result(db.run(TableQuery[Tweets] ++= tweetsToInsert), Duration.Inf)
+
         log.info(s"Inserted ${usersInserted} users")
         log.info(s"Inserted ${tweetsInserted} tweets")
       } catch {
