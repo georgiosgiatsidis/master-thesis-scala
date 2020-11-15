@@ -1,5 +1,7 @@
 package com.giatsidis.spark
 
+import java.time.Instant
+
 import slick.jdbc.JdbcProfile
 import slick.lifted.{ForeignKeyQuery, ProvenShape}
 
@@ -28,7 +30,7 @@ object Tables extends JdbcProfile {
                     fullText: String,
                     location: Option[String] = None,
                     sentiment: String,
-                    createdAt: String,
+                    createdAt: Instant,
                     userId: Option[Long] = None,
                   )
 
@@ -42,7 +44,7 @@ object Tables extends JdbcProfile {
 
     def sentiment: Rep[String] = column[String]("sentiment")
 
-    def createdAt: Rep[String] = column[String]("created_at")
+    def createdAt: Rep[Instant] = column[Instant]("created_at")
 
     def userId: Rep[Option[Long]] = column[Option[Long]]("user_id")
 

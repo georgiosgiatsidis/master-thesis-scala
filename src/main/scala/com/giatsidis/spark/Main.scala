@@ -40,7 +40,7 @@ object Main {
               s"${geo.getLatitude},${geo.getLongitude}"
             }),
             SentimentAnalysisUtils.detectSentiment(cleanedText).toString,
-            status.getCreatedAt.toInstant.toString,
+            status.getCreatedAt.toInstant,
             //            status.getHashtagEntities.toList.map(_.getText),
             User(status.getUser.getId, status.getUser.getScreenName, status.getUser.getProfileImageURLHttps),
           )

@@ -17,10 +17,10 @@ object MysqlService {
   val log = Logger.getLogger(this.getClass)
   log.setLevel(Level.INFO)
 
-  def save(rdd: RDD[Tweet]) = {
+  def save(rdd: RDD[Tweet]): Unit = {
     rdd.foreachPartition(partition => {
       val db = Database.forURL(
-        s"jdbc:mysql://${Config.dbHost}:${Config.dbPort}/${Config.dbName}",
+        s"jdbc:mysql://${Config.dbHost}:${Config.dbPort}/${Config.dbName}?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC",
         Config.dbUsername,
         Config.dbPassword,
       )
@@ -50,7 +50,7 @@ object MysqlService {
         val tweetsInserted = Await.result(db.run(TableQuery[Tweets] ++= tweetsToInsert), Duration.Inf)
 
         log.info(s"Inserted ${usersInserted} users")
-        log.info(s"Inserted ${tweetsInserted} tweets")
+        log.info(s"Inserted ${tweetsInserted.get} tweets")
       } catch {
         case e: Exception =>
           log.error(e)
