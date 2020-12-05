@@ -1,13 +1,12 @@
-package com.giatsidis.spark.models
+package com.giatsidis.spark.database
 
 import java.time.Instant
 
 case class Tweet(
                   id: Long,
                   fullText: String,
-                  location: Option[String],
+                  location: Option[String] = None,
                   sentiment: String,
                   createdAt: Instant,
-                  hashtags: List[Hashtag],
-                  user: User,
+                  userId: Option[Long] = None,
                 )

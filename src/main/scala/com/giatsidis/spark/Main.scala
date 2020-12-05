@@ -2,7 +2,7 @@ package com.giatsidis.spark
 
 import java.sql.DriverManager
 
-import com.giatsidis.spark.models.{Tweet, User}
+import com.giatsidis.spark.models.{Hashtag, Tweet, User}
 import com.giatsidis.spark.services.MysqlService
 import com.giatsidis.spark.utils.{OAuthUtils, SentimentAnalysisUtils, TextUtils}
 import org.apache.spark.SparkConf
@@ -20,7 +20,7 @@ object Main {
     val sparkConf = new SparkConf().setAppName("master-thesis-scala").setMaster("local[*]")
     val streamingContext = new StreamingContext(sparkConf, Seconds(Config.streamingBatchDuration))
     streamingContext.sparkContext.setLogLevel("ERROR")
-    val tweets = TwitterUtils.createStream(streamingContext, None, Array("COVID"))
+    val tweets = TwitterUtils.createStream(streamingContext, None, Array("Bitcoin", "Ethereum", "XRP", "Tether", "Litecoin"))
 
     tweets.foreachRDD { rdd =>
       val savedRdd = rdd
@@ -41,7 +41,7 @@ object Main {
             }),
             SentimentAnalysisUtils.detectSentiment(cleanedText).toString,
             status.getCreatedAt.toInstant,
-            //            status.getHashtagEntities.toList.map(_.getText),
+            status.getHashtagEntities.toList.map(h => Hashtag(h.getText)),
             User(status.getUser.getId, status.getUser.getScreenName, status.getUser.getProfileImageURLHttps),
           )
         })
