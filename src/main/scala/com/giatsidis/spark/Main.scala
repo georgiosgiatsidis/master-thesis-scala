@@ -1,7 +1,5 @@
 package com.giatsidis.spark
 
-import java.sql.DriverManager
-
 import com.giatsidis.spark.models.{Hashtag, Tweet, User}
 import com.giatsidis.spark.services.MysqlService
 import com.giatsidis.spark.utils.{OAuthUtils, SentimentAnalysisUtils, TextUtils}

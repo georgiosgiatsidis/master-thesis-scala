@@ -65,17 +65,17 @@ object Tables extends JdbcProfile {
   class TweetHashtags(tag: Tag) extends Table[TweetHashtag](tag, "TweetHashtags") {
     def id: Rep[Int] = column[Int]("id", O.PrimaryKey, O.AutoInc)
 
-    def tweetId: Rep[Long] = column[Long]("tweetId")
+    def tweetId: Rep[Long] = column[Long]("tweet_id")
 
-    def hashtagId: Rep[Int] = column[Int]("hashtagId")
+    def hashtagId: Rep[Int] = column[Int]("hashtag_id")
 
-    def tweet: ForeignKeyQuery[Tweets, Tweet] = foreignKey("author_fk", tweetId, tweets)(_.id)
+    def tweet: ForeignKeyQuery[Tweets, Tweet] = foreignKey("tweethashtags_ibfk_1", tweetId, tweets)(_.id)
 
-    def hashtag: ForeignKeyQuery[Hashtags, Hashtag] = foreignKey("book_fk", hashtagId, hashtags)(_.id)
+    def hashtag: ForeignKeyQuery[Hashtags, Hashtag] = foreignKey("tweethashtags_ibfk_2", hashtagId, hashtags)(_.id)
 
     def * : ProvenShape[TweetHashtag] =
       (id, tweetId, hashtagId) <> (TweetHashtag.tupled, TweetHashtag.unapply)
 
   }
-
+  
 }
