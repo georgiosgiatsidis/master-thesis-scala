@@ -2,16 +2,17 @@ package com.giatsidis.spark
 
 import com.giatsidis.spark.models.{Hashtag, Tweet, User}
 import com.giatsidis.spark.services.MysqlService
-import com.giatsidis.spark.utils.{OAuthUtils, SentimentAnalysisUtils, TextUtils}
+import com.giatsidis.spark.utils.{OAuthUtils, SentimentAnalysisUtils, TextUtils, InstantSerializer}
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.Seconds
 import org.apache.spark.streaming.twitter.TwitterUtils
+import org.json4s.{DefaultFormats}
 import org.json4s.jackson.Serialization
 import redis.clients.jedis.Jedis
 
 object Main {
-  implicit val formats = org.json4s.DefaultFormats
+  implicit val formats = DefaultFormats + InstantSerializer
 
   def main(args: Array[String]): Unit = {
     OAuthUtils.init()
@@ -62,3 +63,4 @@ object Main {
 
   }
 }
+
