@@ -62,7 +62,7 @@ object Tables extends JdbcProfile {
 
   case class TweetHashtag(id: Int, tweetId: Long, hashtagId: Int)
 
-  class TweetHashtags(tag: Tag) extends Table[TweetHashtag](tag, "TweetHashtags") {
+  class TweetHashtags(tag: Tag) extends Table[TweetHashtag](tag, "Tweet_Hashtags") {
     def id: Rep[Int] = column[Int]("id", O.PrimaryKey, O.AutoInc)
 
     def tweetId: Rep[Long] = column[Long]("tweet_id")
