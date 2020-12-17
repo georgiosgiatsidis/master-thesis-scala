@@ -26,10 +26,6 @@ object MysqlService {
         Config.dbPassword,
       )
 
-      val tweetsToInsert: ArrayBuffer[TweetRow] = ArrayBuffer()
-      val usersToInsert: ArrayBuffer[UserRow] = ArrayBuffer()
-      val hashtags = TableQuery[Hashtags]
-
       try {
         partition.foreach {
           record => {
@@ -52,13 +48,20 @@ object MysqlService {
             Await.result(db.run(tweetsQuery), Duration.Inf)
 
             record.hashtags.foreach(hashtag => {
-              val hashtagsQuery = (hashtags returning hashtags.map(_.id)).insertOrUpdate(HashtagRow(0, hashtag.text))
-              val hashtagId = Await.result(db.run(hashtagsQuery), Duration.Inf)
+              val hashtagsQuery = TableQuery[Hashtags].insertOrUpdate(HashtagRow(0, hashtag.text))
+              Await.result(db.run(hashtagsQuery), Duration.Inf)
 
+              val hashtagQuery = TableQuery[Hashtags]
+                .filter(_.text === hashtag.text)
+                .map(_.id).result
+
+              val hashtagId = Await.result(db.run(hashtagQuery), Duration.Inf).take(1).headOption
+              
               if (hashtagId.isDefined) {
                 val tweetHashtagsQuery = TableQuery[TweetHashtags] += TweetHashtag(0, record.id, hashtagId.get)
                 Await.result(db.run(tweetHashtagsQuery), Duration.Inf)
               }
+
             })
 
           }
