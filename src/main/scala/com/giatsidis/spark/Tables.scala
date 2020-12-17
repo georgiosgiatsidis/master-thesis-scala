@@ -16,9 +16,9 @@ object Tables extends JdbcProfile {
 
     def id: Rep[Long] = column[Long]("id", O.PrimaryKey)
 
-    def screenName: Rep[String] = column[String]("screen_name")
+    def screenName: Rep[String] = column[String]("screenName")
 
-    def profileImageURLHttps: Rep[String] = column[String]("profile_image_url_https")
+    def profileImageURLHttps: Rep[String] = column[String]("profileImageUrlHttps")
 
     def * : ProvenShape[User] =
       (id, screenName, profileImageURLHttps) <> (User.tupled, User.unapply)
@@ -30,18 +30,18 @@ object Tables extends JdbcProfile {
 
     def id: Rep[Long] = column[Long]("id", O.PrimaryKey)
 
-    def fullText: Rep[String] = column[String]("full_text")
+    def fullText: Rep[String] = column[String]("fullText")
 
     def location: Rep[Option[String]] = column[Option[String]]("location")
 
     def sentiment: Rep[String] = column[String]("sentiment")
 
-    def createdAt: Rep[Instant] = column[Instant]("created_at")
+    def createdAt: Rep[Instant] = column[Instant]("createdAt")
 
-    def userId: Rep[Option[Long]] = column[Option[Long]]("user_id")
+    def userId: Rep[Option[Long]] = column[Option[Long]]("userId")
 
     def user: ForeignKeyQuery[Users, User] =
-      foreignKey("user_fk", userId, users)(_.id.?, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
+      foreignKey("tweets_ibfk_1", userId, users)(_.id.?, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
 
     def * : ProvenShape[Tweet] =
       (id, fullText, location, sentiment, createdAt, userId) <> (Tweet.tupled, Tweet.unapply)
@@ -62,12 +62,12 @@ object Tables extends JdbcProfile {
 
   case class TweetHashtag(id: Int, tweetId: Long, hashtagId: Int)
 
-  class TweetHashtags(tag: Tag) extends Table[TweetHashtag](tag, "Tweet_Hashtags") {
+  class TweetHashtags(tag: Tag) extends Table[TweetHashtag](tag, "TweetHashtags") {
     def id: Rep[Int] = column[Int]("id", O.PrimaryKey, O.AutoInc)
 
-    def tweetId: Rep[Long] = column[Long]("tweet_id")
+    def tweetId: Rep[Long] = column[Long]("tweetId")
 
-    def hashtagId: Rep[Int] = column[Int]("hashtag_id")
+    def hashtagId: Rep[Int] = column[Int]("hashtagId")
 
     def tweet: ForeignKeyQuery[Tweets, Tweet] = foreignKey("tweethashtags_ibfk_1", tweetId, tweets)(_.id)
 
