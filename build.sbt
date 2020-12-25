@@ -16,8 +16,10 @@ libraryDependencies ++= Seq(
   "edu.stanford.nlp" % "stanford-corenlp" % coreNlpVersion,
   "edu.stanford.nlp" % "stanford-corenlp" % coreNlpVersion classifier "models",
   "mysql" % "mysql-connector-java" % "5.1.12",
+  "org.apache.spark" %% "spark-mllib" % sparkVersion,
   "org.apache.bahir" %% "spark-streaming-twitter" % "2.4.0",
   "org.apache.spark" %% "spark-streaming" % sparkVersion,
+  "org.apache.spark" %% "spark-sql" % sparkVersion,
   "org.apache.spark" %% "spark-core" % sparkVersion,
   "redis.clients" % "jedis" % jedisVersion
 )
