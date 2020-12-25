@@ -6,15 +6,15 @@ import org.apache.spark.mllib.feature.HashingTF
 import org.apache.spark.mllib.linalg.Vector
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{Row, SQLContext}
-import org.apache.spark.{SparkContext}
+import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.SparkContext
 
 
 object MLlibSentimentAnalyzer {
 
   def computeSentiment(text: String, model: NaiveBayesModel): String = {
-    val tweetInWords: Seq[String] = TextUtils.cleanText(text).split(" ")
-    val polarity = model.predict(MLlibSentimentAnalyzer.transformFeatures(tweetInWords))
+    val words: Seq[String] = TextUtils.cleanText(text).split(" ")
+    val polarity = model.predict(MLlibSentimentAnalyzer.transformFeatures(words))
     normalizeSentiment(polarity)
   }
 
@@ -35,9 +35,9 @@ object MLlibSentimentAnalyzer {
 
   def createModel(sc: SparkContext): NaiveBayesModel = {
     val htf = new HashingTF()
-    val sqlContext = new SQLContext(sc)
+    val spark = SparkSession.builder.config(sc.getConf).getOrCreate()
 
-    val df = sqlContext.read
+    val df = spark.read
       .format("com.databricks.spark.csv")
       .option("header", "false")
       .option("inferSchema", "true")
