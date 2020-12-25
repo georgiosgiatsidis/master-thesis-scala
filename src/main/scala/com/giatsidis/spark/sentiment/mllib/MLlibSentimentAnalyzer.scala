@@ -41,7 +41,7 @@ object MLlibSentimentAnalyzer {
       .format("com.databricks.spark.csv")
       .option("header", "false")
       .option("inferSchema", "true")
-      .load(Config.trainingDataPath)
+      .load(Config.trainingDataFilePath)
       .toDF("polarity", "id", "date", "query", "user", "tweet")
 
     val labeledRDD: RDD[LabeledPoint] = df.select("polarity", "tweet").rdd.map {
