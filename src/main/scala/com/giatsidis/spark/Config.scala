@@ -18,4 +18,5 @@ object Config {
   val redisPort = conf.getInt("REDIS_PORT")
   val redisChannel = conf.getString("REDIS_CHANNEL")
   val streamingBatchDuration = conf.getInt("STREAMING_BATCH_DURATION")
+  val trainingDataPath = conf.getString("TRAINING_DATA_PATH")
 }

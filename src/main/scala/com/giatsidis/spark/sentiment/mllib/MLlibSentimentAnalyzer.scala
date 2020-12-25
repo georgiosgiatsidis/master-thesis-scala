@@ -1,5 +1,6 @@
 package com.giatsidis.spark.sentiment.mllib
 
+import com.giatsidis.spark.Config
 import com.giatsidis.spark.utils.TextUtils
 import org.apache.spark.mllib.classification.{NaiveBayes, NaiveBayesModel}
 import org.apache.spark.mllib.feature.HashingTF
@@ -33,27 +34,25 @@ object MLlibSentimentAnalyzer {
     hashingTF.transform(text)
   }
 
-  def createModel(sc: SparkContext): NaiveBayesModel = {
-    val htf = new HashingTF()
+  def createNBModel(sc: SparkContext): NaiveBayesModel = {
     val spark = SparkSession.builder.config(sc.getConf).getOrCreate()
 
     val df = spark.read
       .format("com.databricks.spark.csv")
       .option("header", "false")
       .option("inferSchema", "true")
-      //      .load("data/testdata.manual.2009.06.14.csv")
-      .load("data/training.1600000.processed.noemoticon.csv")
+      .load(Config.trainingDataPath)
       .toDF("polarity", "id", "date", "query", "user", "tweet")
 
-    val labledRdd: RDD[LabeledPoint] = df.select("polarity", "tweet").rdd.map {
+    val labeledRDD: RDD[LabeledPoint] = df.select("polarity", "tweet").rdd.map {
       case Row(polarity: Int, tweet: String) =>
         val words = TextUtils.cleanText(tweet).split(" ")
-        LabeledPoint(polarity, htf.transform(words))
+        LabeledPoint(polarity, MLlibSentimentAnalyzer.transformFeatures(words))
     }
 
-    labledRdd.cache()
+    labeledRDD.cache()
 
-    val bayesModel: NaiveBayesModel = NaiveBayes.train(labledRdd, lambda = 1.0, modelType = "multinomial")
+    val bayesModel: NaiveBayesModel = NaiveBayes.train(labeledRDD, lambda = 1.0, modelType = "multinomial")
     bayesModel
   }
 }
