@@ -2,12 +2,12 @@ package com.giatsidis.spark
 
 import com.giatsidis.spark.models.{Hashtag, Tweet, User}
 import com.giatsidis.spark.services.MysqlService
-import com.giatsidis.spark.utils.{OAuthUtils, SentimentAnalysisUtils, TextUtils, InstantSerializer}
+import com.giatsidis.spark.utils.{InstantSerializer, OAuthUtils, SentimentAnalysisUtils, TextUtils}
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.Seconds
 import org.apache.spark.streaming.twitter.TwitterUtils
-import org.json4s.{DefaultFormats}
+import org.json4s.DefaultFormats
 import org.json4s.jackson.Serialization
 import redis.clients.jedis.Jedis
 
@@ -16,10 +16,11 @@ object Main {
 
   def main(args: Array[String]): Unit = {
     OAuthUtils.init()
-    val sparkConf = new SparkConf().setAppName("master-thesis-scala").setMaster("local[*]")
+    val sparkConf = new SparkConf().setAppName(this.getClass.getSimpleName).setMaster("local[*]")
     val streamingContext = new StreamingContext(sparkConf, Seconds(Config.streamingBatchDuration))
     streamingContext.sparkContext.setLogLevel("ERROR")
-    val tweets = TwitterUtils.createStream(streamingContext, None, Array("Bitcoin", "Ethereum", "XRP", "Tether", "Litecoin"))
+    val filters = Array("Bitcoin", "BTC", "Ethereum", "ETH", "XRP", "Tether", "Litecoin");
+    val tweets = TwitterUtils.createStream(streamingContext, None, filters)
 
     tweets.foreachRDD { rdd =>
       val savedRdd = rdd
