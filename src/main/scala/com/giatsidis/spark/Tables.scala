@@ -12,7 +12,7 @@ object Tables extends JdbcProfile {
 
   import api._
 
-  class Users(tag: Tag) extends Table[User](tag, "users") {
+  class Users(tag: Tag) extends Table[User](tag, "Users") {
 
     def id: Rep[Long] = column[Long]("id", O.PrimaryKey)
 
@@ -26,7 +26,7 @@ object Tables extends JdbcProfile {
 
   val users = TableQuery[Users]
 
-  class Tweets(tag: Tag) extends Table[Tweet](tag, "tweets") {
+  class Tweets(tag: Tag) extends Table[Tweet](tag, "Tweets") {
 
     def id: Rep[Long] = column[Long]("id", O.PrimaryKey)
 
@@ -49,7 +49,7 @@ object Tables extends JdbcProfile {
 
   val tweets = TableQuery[Tweets]
 
-  class Hashtags(tag: Tag) extends Table[Hashtag](tag, "hashtags") {
+  class Hashtags(tag: Tag) extends Table[Hashtag](tag, "Hashtags") {
     def id: Rep[Int] = column[Int]("id", O.PrimaryKey, O.AutoInc)
 
     def text: Rep[String] = column[String]("text")
