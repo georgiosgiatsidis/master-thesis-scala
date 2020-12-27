@@ -15,4 +15,9 @@ object TextUtils {
       .replaceAll("(?:https?|http?)//[\\w/%.-]+", "")
       .replaceAll("[^ 'a-zA-Z0-9,.?!]", "") // keep only chars in the list
   }
+
+  def remove4ByteChars(input: String): String = {
+    input.replaceAll("[^\\u0000-\\uFFFF]", "");
+  }
+
 }

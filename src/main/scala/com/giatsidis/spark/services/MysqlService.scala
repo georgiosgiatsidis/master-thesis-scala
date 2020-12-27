@@ -20,8 +20,10 @@ object MysqlService {
 
   def save(rdd: RDD[Tweet]): Unit = {
     rdd.foreachPartition(partition => {
+      val url = s"jdbc:mysql://${Config.dbHost}:${Config.dbPort}/${Config.dbName}?serverTimezone=UTC&useUnicode=true&characterEncoding=UTF-8";
+
       val db = Database.forURL(
-        s"jdbc:mysql://${Config.dbHost}:${Config.dbPort}/${Config.dbName}?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC",
+        url,
         Config.dbUsername,
         Config.dbPassword,
       )
@@ -38,7 +40,7 @@ object MysqlService {
             val tweetsQuery = TableQuery[Tweets] +=
               TweetRow(
                 record.id,
-                record.fullText,
+                TextUtils.remove4ByteChars(record.fullText),
                 record.location,
                 record.sentiment,
                 record.createdAt,
@@ -56,7 +58,7 @@ object MysqlService {
                 .map(_.id).result
 
               val hashtagId = Await.result(db.run(hashtagQuery), Duration.Inf).take(1).headOption
-              
+
               if (hashtagId.isDefined) {
                 val tweetHashtagsQuery = TableQuery[TweetHashtags] += TweetHashtag(0, record.id, hashtagId.get)
                 Await.result(db.run(tweetHashtagsQuery), Duration.Inf)
