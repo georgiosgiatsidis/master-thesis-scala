@@ -1,0 +1,15 @@
+{
+  "namespace": "com.giatsidis.avro",
+  "type": "record",
+  "name": "Status",
+  "fields": [
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "text",
+      "type": "string"
+    }
+  ]
+}
