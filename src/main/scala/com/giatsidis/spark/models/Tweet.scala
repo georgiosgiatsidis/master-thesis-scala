@@ -10,4 +10,5 @@ case class Tweet(
                   createdAt: Instant,
                   hashtags: List[Hashtag],
                   user: User,
+                  categories: List[String],
                 )

@@ -1,6 +1,7 @@
 package com.giatsidis.spark
 
 import com.giatsidis.spark.models.{Hashtag, Tweet, User}
+import com.giatsidis.spark.sentiment.mllib.MLlibSentimentAnalyzer
 import com.giatsidis.spark.services.MysqlService
 import com.giatsidis.spark.utils.{InstantSerializer, OAuthUtils, SentimentAnalysisUtils, TextUtils}
 import org.apache.spark.SparkConf
@@ -21,6 +22,7 @@ object Main {
     streamingContext.sparkContext.setLogLevel("ERROR")
     val filters = Array("Bitcoin", "BTC", "Ethereum", "ETH", "XRP", "Tether", "Litecoin");
     val tweets = TwitterUtils.createStream(streamingContext, None, filters)
+    //    val model = MLlibSentimentAnalyzer.createNBModel(streamingContext.sparkContext)
 
     tweets.foreachRDD { rdd =>
       val savedRdd = rdd
@@ -40,9 +42,15 @@ object Main {
               s"${geo.getLatitude},${geo.getLongitude}"
             }),
             SentimentAnalysisUtils.detectSentiment(cleanedText).toString,
+            //            MLlibSentimentAnalyzer.computeSentiment(status.getText, model),
             status.getCreatedAt.toInstant,
-            status.getHashtagEntities.toList.map(h => Hashtag(h.getText)),
+            status.getHashtagEntities.toList
+              .filter(h => filters.map(_.toLowerCase).contains(h.getText.toLowerCase))
+              .map(h => Hashtag(h.getText)),
             User(status.getUser.getId, status.getUser.getScreenName, status.getUser.getProfileImageURLHttps),
+            filters.toList.filter(f => {
+              status.getText.toLowerCase.contains(f.toLowerCase())
+            })
           )
         })
 
