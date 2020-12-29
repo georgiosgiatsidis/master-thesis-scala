@@ -3,7 +3,7 @@ package com.giatsidis.spark
 import com.giatsidis.spark.models.{Hashtag, Tweet, User}
 import com.giatsidis.spark.sentiment.mllib.MLlibSentimentAnalyzer
 import com.giatsidis.spark.services.MysqlService
-import com.giatsidis.spark.utils.{InstantSerializer, OAuthUtils, SentimentAnalysisUtils, TextUtils}
+import com.giatsidis.spark.utils.{Helpers, InstantSerializer, OAuthUtils, SentimentAnalysisUtils, TextUtils}
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.Seconds
@@ -25,34 +25,28 @@ object Main {
     //    val model = MLlibSentimentAnalyzer.createNBModel(streamingContext.sparkContext)
 
     tweets.foreachRDD { rdd =>
-      val savedRdd = rdd
-        .filter(_.getLang == "en")
-        // Filter retweets
-        .filter(!_.isRetweet)
-        // Filter tweets with big number of hashtags
-        .filter(_.getHashtagEntities.toList.length < 5)
-        // Filter tweets with short content length
-        .filter(_.getText.length > 20)
-        .map(status => {
-          val cleanedText = TextUtils.cleanText(status.getText)
-          Tweet(
-            status.getId,
-            status.getText,
-            Option(status.getGeoLocation).map(geo => {
-              s"${geo.getLatitude},${geo.getLongitude}"
-            }),
-            SentimentAnalysisUtils.detectSentiment(cleanedText).toString,
-            //            MLlibSentimentAnalyzer.computeSentiment(status.getText, model),
-            status.getCreatedAt.toInstant,
-            status.getHashtagEntities.toList
-              .filter(h => filters.map(_.toLowerCase).contains(h.getText.toLowerCase))
-              .map(h => Hashtag(h.getText)),
-            User(status.getUser.getId, status.getUser.getScreenName, status.getUser.getProfileImageURLHttps),
-            filters.toList.filter(f => {
-              status.getText.toLowerCase.contains(f.toLowerCase())
-            })
-          )
-        })
+      val savedRdd =
+        Helpers.applyFilters(rdd)
+          .map(status => {
+            val cleanedText = TextUtils.cleanText(status.getText)
+            Tweet(
+              status.getId,
+              status.getText,
+              Option(status.getGeoLocation).map(geo => {
+                s"${geo.getLatitude},${geo.getLongitude}"
+              }),
+              SentimentAnalysisUtils.detectSentiment(cleanedText).toString,
+              //            MLlibSentimentAnalyzer.computeSentiment(status.getText, model),
+              status.getCreatedAt.toInstant,
+              status.getHashtagEntities.toList
+                .filter(h => filters.map(_.toLowerCase).contains(h.getText.toLowerCase))
+                .map(h => Hashtag(h.getText)),
+              User(status.getUser.getId, status.getUser.getScreenName, status.getUser.getProfileImageURLHttps),
+              filters.toList.filter(f => {
+                status.getText.toLowerCase.contains(f.toLowerCase())
+              })
+            )
+          })
 
       // save to MySQL
       MysqlService.save(savedRdd)

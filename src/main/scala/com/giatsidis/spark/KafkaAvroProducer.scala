@@ -3,7 +3,7 @@ package com.giatsidis.spark
 import java.io.File
 import java.util.Properties
 
-import com.giatsidis.spark.utils.OAuthUtils
+import com.giatsidis.spark.utils.{Helpers, OAuthUtils}
 import io.confluent.kafka.serializers.KafkaAvroSerializer
 import org.apache.avro.Schema.Parser
 import org.apache.avro.generic.GenericData
@@ -24,14 +24,7 @@ object KafkaAvroProducer {
     val tweets = TwitterUtils.createStream(streamingContext, None, filters)
 
     tweets.foreachRDD { rdd =>
-      val savedRdd = rdd
-        .filter(_.getLang == "en")
-        // Filter retweets
-        .filter(!_.isRetweet)
-        // Filter tweets with big number of hashtags
-        .filter(_.getHashtagEntities.toList.length < 5)
-        // Filter tweets with short content length
-        .filter(_.getText.length > 20)
+      val savedRdd = Helpers.applyFilters(rdd)
 
       val writerTopic = "tweets1"
 
