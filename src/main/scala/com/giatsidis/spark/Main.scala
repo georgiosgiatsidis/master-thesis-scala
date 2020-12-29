@@ -2,8 +2,9 @@ package com.giatsidis.spark
 
 import com.giatsidis.spark.models.{Hashtag, Tweet, User}
 import com.giatsidis.spark.sentiment.mllib.MLlibSentimentAnalyzer
+import com.giatsidis.spark.sentiment.stanford.StanfordSentimentAnalyzer
 import com.giatsidis.spark.services.MysqlService
-import com.giatsidis.spark.utils.{Helpers, InstantSerializer, OAuthUtils, SentimentAnalysisUtils, TextUtils}
+import com.giatsidis.spark.utils.{Helpers, InstantSerializer, OAuthUtils, TextUtils}
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.Seconds
@@ -35,7 +36,7 @@ object Main {
               Option(status.getGeoLocation).map(geo => {
                 s"${geo.getLatitude},${geo.getLongitude}"
               }),
-              SentimentAnalysisUtils.detectSentiment(cleanedText).toString,
+              StanfordSentimentAnalyzer.detectSentiment(cleanedText).toString,
               //            MLlibSentimentAnalyzer.computeSentiment(status.getText, model),
               status.getCreatedAt.toInstant,
               status.getHashtagEntities.toList

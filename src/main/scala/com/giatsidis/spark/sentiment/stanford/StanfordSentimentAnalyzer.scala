@@ -1,8 +1,6 @@
-package com.giatsidis.spark.utils
+package com.giatsidis.spark.sentiment.stanford
 
 import java.util.Properties
-
-import collection.JavaConverters._
 
 import edu.stanford.nlp.ling.CoreAnnotations
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations
@@ -11,7 +9,7 @@ import edu.stanford.nlp.sentiment.SentimentCoreAnnotations
 
 import scala.collection.mutable.ListBuffer
 
-object SentimentAnalysisUtils {
+object StanfordSentimentAnalyzer {
 
   lazy val pipeline = {
     val props = new Properties()
