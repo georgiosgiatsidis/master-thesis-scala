@@ -2,6 +2,8 @@ package com.giatsidis.spark.sentiment.stanford
 
 import java.util.Properties
 
+import collection.JavaConverters._
+
 import edu.stanford.nlp.ling.CoreAnnotations
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations
 import edu.stanford.nlp.pipeline.{Annotation, StanfordCoreNLP}
