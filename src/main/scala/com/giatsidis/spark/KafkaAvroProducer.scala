@@ -26,15 +26,13 @@ object KafkaAvroProducer {
     tweets.foreachRDD { rdd =>
       val savedRdd = Helpers.applyFilters(rdd)
 
-      val writerTopic = "tweets1"
-
       savedRdd.foreachPartition { partition =>
         val producerProps = new Properties()
 
-        producerProps.put("bootstrap.servers", "localhost:9092")
+        producerProps.put("bootstrap.servers", Config.kafkaServers)
         producerProps.put("key.serializer", classOf[StringSerializer])
         producerProps.put("value.serializer", classOf[KafkaAvroSerializer])
-        producerProps.put("schema.registry.url", "http://localhost:8081")
+        producerProps.put("schema.registry.url", Config.avroSchemaRegistryUrl)
 
         val producer = new KafkaProducer[String, GenericData.Record](producerProps)
         val schemaParser = new Parser
@@ -44,7 +42,7 @@ object KafkaAvroProducer {
           val record = new GenericData.Record(schema)
           record.put("name", "name")
           record.put("text", line.getText)
-          val producerRecord = new ProducerRecord[String, GenericData.Record](writerTopic, record)
+          val producerRecord = new ProducerRecord[String, GenericData.Record](Config.kafkaTopic, record)
           producer.send(producerRecord)
         }
 

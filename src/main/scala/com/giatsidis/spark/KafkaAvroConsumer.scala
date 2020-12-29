@@ -15,20 +15,20 @@ object KafkaAvroConsumer {
     val sparkConf = new SparkConf().setAppName(this.getClass.getSimpleName).setMaster("local[*]")
 
     val clientParams = Map[String, Object](
-      "bootstrap.servers" -> "localhost:9092",
+      "bootstrap.servers" -> Config.kafkaServers,
       "key.deserializer" -> classOf[StringDeserializer],
       "value.deserializer" -> classOf[KafkaAvroDeserializer],
       "auto.offset.reset" -> "latest",
       "group.id" -> "1",
       "enable.auto.commit" -> (false: java.lang.Boolean),
-      "schema.registry.url" -> "http://localhost:8081"
+      "schema.registry.url" -> Config.avroSchemaRegistryUrl
     )
 
     val streamingContext = new StreamingContext(sparkConf, Seconds(2))
 
     streamingContext.sparkContext.setLogLevel("ERROR")
 
-    val topics = Array("tweets1")
+    val topics = Array(Config.kafkaTopic)
 
     val dStream = KafkaUtils.createDirectStream[String, GenericData.Record](
       streamingContext,
