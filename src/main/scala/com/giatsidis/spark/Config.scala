@@ -1,9 +1,9 @@
 package com.giatsidis.spark
 
-import com.typesafe.config.{Config, ConfigFactory}
+import com.typesafe.config.{Config => TypesafeConfig, ConfigFactory}
 
 object Config {
-  private val conf: Config = ConfigFactory.load()
+  private val conf: TypesafeConfig = ConfigFactory.load()
 
   val consumerKey = conf.getString("CONSUMER_KEY")
   val consumerSecret = conf.getString("CONSUMER_SECRET")

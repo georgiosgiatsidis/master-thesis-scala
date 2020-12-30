@@ -20,6 +20,7 @@ object KafkaAvroProducer {
     val streamingContext = new StreamingContext(sparkConf, Seconds(Config.streamingBatchDuration))
     streamingContext.sparkContext.setLogLevel("ERROR")
     val filters = Array("Bitcoin", "BTC", "Ethereum", "ETH", "XRP", "Tether", "Litecoin");
+
     val tweets = TwitterUtils.createStream(streamingContext, None, filters)
 
     tweets.foreachRDD { rdd =>

@@ -19,7 +19,7 @@ object MysqlService {
 
   def save(rdd: RDD[Tweet]): Unit = {
     rdd.foreachPartition(partition => {
-      val url = s"jdbc:mysql://${Config.dbHost}:${Config.dbPort}/${Config.dbName}?serverTimezone=UTC&useUnicode=true&characterEncoding=UTF-8";
+      val url = s"jdbc:mysql://${Config.dbHost}:${Config.dbPort}/${Config.dbName}?serverTimezone=UTC&useUnicode=true&characterEncoding=UTF-8&useSSL=false";
 
       val db = Database.forURL(
         url,
