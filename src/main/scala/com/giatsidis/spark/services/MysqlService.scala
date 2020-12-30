@@ -1,7 +1,7 @@
 package com.giatsidis.spark.services
 
 import com.giatsidis.spark.Config
-import com.giatsidis.spark.Tables.{Hashtags, TweetHashtag, TweetHashtags, Tweets, Users}
+import com.giatsidis.spark.database.Tables.{Hashtags, TweetHashtag, TweetHashtags, Tweets, Users}
 import com.giatsidis.spark.database.{Hashtag => HashtagRow, Tweet => TweetRow, User => UserRow}
 import com.giatsidis.spark.models.Tweet
 import com.giatsidis.spark.utils.TextUtils

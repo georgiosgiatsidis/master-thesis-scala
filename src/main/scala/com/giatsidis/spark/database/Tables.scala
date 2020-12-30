@@ -1,10 +1,7 @@
-package com.giatsidis.spark
+package com.giatsidis.spark.database
 
 import java.time.Instant
 
-import com.giatsidis.spark.database.Hashtag
-import com.giatsidis.spark.database.Tweet
-import com.giatsidis.spark.database.User
 import slick.jdbc.JdbcProfile
 import slick.lifted.{ForeignKeyQuery, ProvenShape}
 
@@ -77,5 +74,5 @@ object Tables extends JdbcProfile {
       (id, tweetId, hashtagId) <> (TweetHashtag.tupled, TweetHashtag.unapply)
 
   }
-  
+
 }
