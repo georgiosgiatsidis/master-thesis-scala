@@ -2,8 +2,9 @@ package com.giatsidis.spark.sentiment.stanford
 
 import java.util.Properties
 
-import collection.JavaConverters._
+import com.giatsidis.spark.sentiment.{NEGATIVE, NEUTRAL, NOT_UNDERSTOOD, POSITIVE, SentimentType, VERY_NEGATIVE, VERY_POSITIVE}
 
+import collection.JavaConverters._
 import edu.stanford.nlp.ling.CoreAnnotations
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations
 import edu.stanford.nlp.pipeline.{Annotation, StanfordCoreNLP}
@@ -77,19 +78,5 @@ object StanfordSentimentAnalyzer {
     }
 
   }
-
-  trait SentimentType
-
-  case object VERY_NEGATIVE extends SentimentType
-
-  case object NEGATIVE extends SentimentType
-
-  case object NEUTRAL extends SentimentType
-
-  case object POSITIVE extends SentimentType
-
-  case object VERY_POSITIVE extends SentimentType
-
-  case object NOT_UNDERSTOOD extends SentimentType
 
 }

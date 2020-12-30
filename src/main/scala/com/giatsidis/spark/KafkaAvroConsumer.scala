@@ -2,10 +2,12 @@ package com.giatsidis.spark
 
 import java.time.Instant
 
+import collection.JavaConverters._
 import com.giatsidis.avro.Status
-import com.giatsidis.spark.models.{Tweet, User}
+import com.giatsidis.spark.models.{Hashtag, Tweet, User}
+import com.giatsidis.spark.sentiment.stanford.StanfordSentimentAnalyzer
+import com.giatsidis.spark.services.{MysqlService, RedisService}
 import io.confluent.kafka.serializers.KafkaAvroDeserializer
-import org.apache.avro.generic.GenericData
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.spark.SparkConf
@@ -42,15 +44,16 @@ object KafkaAvroConsumer {
     )
 
     dStream.foreachRDD { rdd =>
-      rdd
+      val savedRdd = rdd
         .map { rdd: ConsumerRecord[String, Status] =>
           Tweet(
             rdd.value.getId,
             rdd.value.getFullText,
-            null,
-            "POSITIVE",
+            Option(rdd.value.getLocation),
+            StanfordSentimentAnalyzer.detectSentiment(rdd.value.getFullText).toString,
             Instant.parse(rdd.value.getCreatedAt),
-            List(),
+            rdd.value.getHashtags.asScala.toList
+              .map(h => Hashtag(h.getText)),
             User(
               rdd.value.getUserId,
               rdd.value.getUserScreenName,
@@ -59,11 +62,9 @@ object KafkaAvroConsumer {
             List()
           )
         }
-        .foreachPartition { partition =>
-          partition.foreach { line =>
-            println(line)
-          }
-        }
+
+      MysqlService.save(savedRdd)
+      RedisService.save(savedRdd)
     }
 
     streamingContext.start()

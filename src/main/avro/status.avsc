@@ -12,8 +12,32 @@
       "type": "string"
     },
     {
+      "name": "location",
+      "type": [
+        "null",
+        "string"
+      ],
+      "default": null
+    },
+    {
       "name": "created_at",
       "type": "string"
+    },
+    {
+      "name": "hashtags",
+      "type": {
+        "type": "array",
+        "items": {
+          "name": "Hashtag",
+          "type": "record",
+          "fields": [
+            {
+              "name": "text",
+              "type": "string"
+            }
+          ]
+        }
+      }
     },
     {
       "name": "user_id",

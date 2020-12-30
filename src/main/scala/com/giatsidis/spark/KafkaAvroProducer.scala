@@ -1,13 +1,12 @@
 package com.giatsidis.spark
 
-import java.io.File
 import java.util.Properties
 
-import com.giatsidis.avro.Status
+import scala.collection.JavaConverters._
+
+import com.giatsidis.avro.{Hashtag, Status}
 import com.giatsidis.spark.utils.{Helpers, OAuthUtils}
 import io.confluent.kafka.serializers.KafkaAvroSerializer
-import org.apache.avro.Schema.Parser
-import org.apache.avro.generic.GenericData
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 import org.apache.kafka.common.serialization.StringSerializer
 import org.apache.spark.SparkConf
@@ -38,14 +37,26 @@ object KafkaAvroProducer {
         val producer = new KafkaProducer[String, Status](producerProps)
 
         partition.foreach { line =>
+          val location = Option(line.getGeoLocation).map(geo => {
+            s"${geo.getLatitude},${geo.getLongitude}"
+          })
+
           val status = Status.newBuilder()
             .setId(line.getId)
             .setFullText(line.getText)
+            .setLocation(location.getOrElse(null))
             .setCreatedAt(line.getCreatedAt.toInstant.toString)
             .setUserId(line.getUser.getId)
             .setUserScreenName(line.getUser.getScreenName)
             .setUserProfileImageHttps(line.getUser.getProfileImageURLHttps)
+            .setHashtags(
+              line.getHashtagEntities
+                .toList
+                .map(h => Hashtag.newBuilder().setText(h.getText).build())
+                .asJava
+            )
             .build()
+
           val producerRecord = new ProducerRecord[String, Status](Config.kafkaTopic, status)
           producer.send(producerRecord)
         }
