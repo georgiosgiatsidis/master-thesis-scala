@@ -40,8 +40,12 @@ object KafkaAvroProducer {
 
         partition.foreach { line =>
           val record = new GenericData.Record(schema)
-          record.put("name", "name")
-          record.put("text", line.getText)
+          record.put("id", line.getId)
+          record.put("full_text", line.getText)
+          record.put("created_at", line.getCreatedAt.toInstant.toString)
+          record.put("user_id", line.getUser.getId)
+          record.put("user_screen_name", line.getUser.getScreenName)
+          record.put("user_profile_image_https", line.getUser.getProfileImageURLHttps)
           val producerRecord = new ProducerRecord[String, GenericData.Record](Config.kafkaTopic, record)
           producer.send(producerRecord)
         }

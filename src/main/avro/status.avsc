@@ -4,11 +4,27 @@
   "name": "Status",
   "fields": [
     {
-      "name": "name",
+      "name": "id",
+      "type": "long"
+    },
+    {
+      "name": "full_text",
       "type": "string"
     },
     {
-      "name": "text",
+      "name": "created_at",
+      "type": "string"
+    },
+    {
+      "name": "user_id",
+      "type": "long"
+    },
+    {
+      "name": "user_screen_name",
+      "type": "string"
+    },
+    {
+      "name": "user_profile_image_https",
       "type": "string"
     }
   ]

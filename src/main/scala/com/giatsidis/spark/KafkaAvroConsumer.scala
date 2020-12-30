@@ -1,5 +1,8 @@
 package com.giatsidis.spark
 
+import java.time.Instant
+
+import com.giatsidis.spark.models.{Tweet, User}
 import io.confluent.kafka.serializers.KafkaAvroDeserializer
 import org.apache.avro.generic.GenericData
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -37,15 +40,33 @@ object KafkaAvroConsumer {
     )
 
     dStream.foreachRDD { rdd =>
-      rdd.foreachPartition { partition =>
-        partition.foreach { line =>
-          println(line.value.get("text"))
+      rdd
+        .map { rdd: ConsumerRecord[String, GenericData.Record] =>
+          Tweet(
+            rdd.value.get("id").toString.toLong,
+            rdd.value.get("full_text").toString,
+            null,
+            "POSITIVE",
+            Instant.parse(rdd.value.get("created_at").toString),
+            List(),
+            User(
+              rdd.value.get("user_id").toString.toLong,
+              rdd.value.get("user_screen_name").toString,
+              rdd.value.get("user_profile_image_https").toString,
+            ),
+            List()
+          )
         }
-      }
+        .foreachPartition { partition =>
+          partition.foreach { line =>
+            println(line)
+          }
+        }
     }
 
     streamingContext.start()
     streamingContext.awaitTermination()
 
   }
+
 }
