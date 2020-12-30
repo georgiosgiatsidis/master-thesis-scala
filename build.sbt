@@ -29,3 +29,5 @@ libraryDependencies ++= Seq(
   "redis.clients" % "jedis" % jedisVersion,
   "io.confluent" % "kafka-avro-serializer" % "5.5.0",
 )
+
+avroStringType := "String"

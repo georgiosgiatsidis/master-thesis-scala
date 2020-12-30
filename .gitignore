@@ -3,7 +3,7 @@ dist/*
 target/
 lib_managed/
 src_managed/
-project/
+project/project
 .history
 .cache
 .lib/

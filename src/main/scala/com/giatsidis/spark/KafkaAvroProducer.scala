@@ -3,6 +3,7 @@ package com.giatsidis.spark
 import java.io.File
 import java.util.Properties
 
+import com.giatsidis.avro.Status
 import com.giatsidis.spark.utils.{Helpers, OAuthUtils}
 import io.confluent.kafka.serializers.KafkaAvroSerializer
 import org.apache.avro.Schema.Parser
@@ -34,19 +35,18 @@ object KafkaAvroProducer {
         producerProps.put("value.serializer", classOf[KafkaAvroSerializer])
         producerProps.put("schema.registry.url", Config.avroSchemaRegistryUrl)
 
-        val producer = new KafkaProducer[String, GenericData.Record](producerProps)
-        val schemaParser = new Parser
-        val schema = schemaParser.parse(new File("src/main/avro/status.avsc"))
+        val producer = new KafkaProducer[String, Status](producerProps)
 
         partition.foreach { line =>
-          val record = new GenericData.Record(schema)
-          record.put("id", line.getId)
-          record.put("full_text", line.getText)
-          record.put("created_at", line.getCreatedAt.toInstant.toString)
-          record.put("user_id", line.getUser.getId)
-          record.put("user_screen_name", line.getUser.getScreenName)
-          record.put("user_profile_image_https", line.getUser.getProfileImageURLHttps)
-          val producerRecord = new ProducerRecord[String, GenericData.Record](Config.kafkaTopic, record)
+          val status = Status.newBuilder()
+            .setId(line.getId)
+            .setFullText(line.getText)
+            .setCreatedAt(line.getCreatedAt.toInstant.toString)
+            .setUserId(line.getUser.getId)
+            .setUserScreenName(line.getUser.getScreenName)
+            .setUserProfileImageHttps(line.getUser.getProfileImageURLHttps)
+            .build()
+          val producerRecord = new ProducerRecord[String, Status](Config.kafkaTopic, status)
           producer.send(producerRecord)
         }
 

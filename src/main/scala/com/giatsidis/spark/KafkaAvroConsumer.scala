@@ -2,6 +2,7 @@ package com.giatsidis.spark
 
 import java.time.Instant
 
+import com.giatsidis.avro.Status
 import com.giatsidis.spark.models.{Tweet, User}
 import io.confluent.kafka.serializers.KafkaAvroDeserializer
 import org.apache.avro.generic.GenericData
@@ -24,7 +25,8 @@ object KafkaAvroConsumer {
       "auto.offset.reset" -> "latest",
       "group.id" -> "1",
       "enable.auto.commit" -> (false: java.lang.Boolean),
-      "schema.registry.url" -> Config.avroSchemaRegistryUrl
+      "schema.registry.url" -> Config.avroSchemaRegistryUrl,
+      "specific.avro.reader" -> (true: java.lang.Boolean)
     )
 
     val streamingContext = new StreamingContext(sparkConf, Seconds(2))
@@ -33,26 +35,26 @@ object KafkaAvroConsumer {
 
     val topics = Array(Config.kafkaTopic)
 
-    val dStream = KafkaUtils.createDirectStream[String, GenericData.Record](
+    val dStream = KafkaUtils.createDirectStream[String, Status](
       streamingContext,
       PreferConsistent,
-      Subscribe[String, GenericData.Record](topics, clientParams)
+      Subscribe[String, Status](topics, clientParams)
     )
 
     dStream.foreachRDD { rdd =>
       rdd
-        .map { rdd: ConsumerRecord[String, GenericData.Record] =>
+        .map { rdd: ConsumerRecord[String, Status] =>
           Tweet(
-            rdd.value.get("id").toString.toLong,
-            rdd.value.get("full_text").toString,
+            rdd.value.getId,
+            rdd.value.getFullText,
             null,
             "POSITIVE",
-            Instant.parse(rdd.value.get("created_at").toString),
+            Instant.parse(rdd.value.getCreatedAt),
             List(),
             User(
-              rdd.value.get("user_id").toString.toLong,
-              rdd.value.get("user_screen_name").toString,
-              rdd.value.get("user_profile_image_https").toString,
+              rdd.value.getUserId,
+              rdd.value.getUserScreenName,
+              rdd.value.getUserProfileImageHttps,
             ),
             List()
           )
