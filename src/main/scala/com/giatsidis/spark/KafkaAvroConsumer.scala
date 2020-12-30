@@ -55,9 +55,9 @@ object KafkaAvroConsumer {
             rdd.value.getHashtags.asScala.toList
               .map(h => Hashtag(h.getText)),
             User(
-              rdd.value.getUserId,
-              rdd.value.getUserScreenName,
-              rdd.value.getUserProfileImageHttps,
+              rdd.value.getUser.getId,
+              rdd.value.getUser.getScreenName,
+              rdd.value.getUser.getProfileImageHttps,
             ),
             List()
           )

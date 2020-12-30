@@ -3,8 +3,7 @@ package com.giatsidis.spark
 import java.util.Properties
 
 import scala.collection.JavaConverters._
-
-import com.giatsidis.avro.{Hashtag, Status}
+import com.giatsidis.avro.{Hashtag, Status, User}
 import com.giatsidis.spark.utils.{Helpers, OAuthUtils}
 import io.confluent.kafka.serializers.KafkaAvroSerializer
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
@@ -46,9 +45,13 @@ object KafkaAvroProducer {
             .setFullText(line.getText)
             .setLocation(location.getOrElse(null))
             .setCreatedAt(line.getCreatedAt.toInstant.toString)
-            .setUserId(line.getUser.getId)
-            .setUserScreenName(line.getUser.getScreenName)
-            .setUserProfileImageHttps(line.getUser.getProfileImageURLHttps)
+            .setUser(
+              User.newBuilder()
+                .setId(line.getUser.getId)
+                .setScreenName(line.getUser.getScreenName)
+                .setProfileImageHttps(line.getUser.getProfileImageURLHttps)
+                .build()
+            )
             .setHashtags(
               line.getHashtagEntities
                 .toList

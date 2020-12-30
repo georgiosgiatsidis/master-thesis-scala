@@ -40,16 +40,25 @@
       }
     },
     {
-      "name": "user_id",
-      "type": "long"
-    },
-    {
-      "name": "user_screen_name",
-      "type": "string"
-    },
-    {
-      "name": "user_profile_image_https",
-      "type": "string"
+      "name": "user",
+      "type": {
+        "type": "record",
+        "name": "User",
+        "fields": [
+          {
+            "name": "id",
+            "type": "long"
+          },
+          {
+            "name": "screen_name",
+            "type": "string"
+          },
+          {
+            "name": "profile_image_https",
+            "type": "string"
+          }
+        ]
+      }
     }
   ]
 }
