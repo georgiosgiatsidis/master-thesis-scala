@@ -1,6 +1,7 @@
 package com.giatsidis.spark.sentiment.mllib
 
 import com.giatsidis.spark.Config
+import com.giatsidis.spark.sentiment.{NEGATIVE, NEUTRAL, POSITIVE, SentimentType}
 import com.giatsidis.spark.utils.TextUtils
 import org.apache.spark.mllib.classification.{NaiveBayes, NaiveBayesModel}
 import org.apache.spark.mllib.feature.HashingTF
@@ -13,18 +14,18 @@ import org.apache.spark.SparkContext
 
 object MLlibSentimentAnalyzer {
 
-  def computeSentiment(text: String, model: NaiveBayesModel): String = {
+  def detectSentiment(text: String, model: NaiveBayesModel): SentimentType = {
     val words: Seq[String] = TextUtils.cleanText(text).split(" ")
     val polarity = model.predict(MLlibSentimentAnalyzer.transformFeatures(words))
     normalizeSentiment(polarity)
   }
 
-  def normalizeSentiment(sentiment: Double): String = {
+  def normalizeSentiment(sentiment: Double): SentimentType = {
     sentiment match {
-      case x if x == 0 => "NEGATIVE"
-      case x if x == 2 => "NEUTRAL"
-      case x if x == 4 => "POSITIVE"
-      case _ => "NEUTRAL"
+      case x if x == 0 => NEGATIVE
+      case x if x == 2 => NEUTRAL
+      case x if x == 4 => POSITIVE
+      case _ => NEUTRAL
     }
   }
 

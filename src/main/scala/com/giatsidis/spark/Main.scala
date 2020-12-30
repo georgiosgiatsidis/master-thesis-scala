@@ -32,7 +32,7 @@ object Main {
                 s"${geo.getLatitude},${geo.getLongitude}"
               }),
               StanfordSentimentAnalyzer.detectSentiment(cleanedText).toString,
-              //            MLlibSentimentAnalyzer.computeSentiment(status.getText, model),
+              //            MLlibSentimentAnalyzer.detectSentiment(status.getText, model).toString,
               status.getCreatedAt.toInstant,
               status.getHashtagEntities.toList
                 .filter(h => filters.map(_.toLowerCase).contains(h.getText.toLowerCase))
