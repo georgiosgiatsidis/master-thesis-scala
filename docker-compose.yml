@@ -1,14 +1,29 @@
 version: "3"
 services:
-  spark-app:
+  spark-app-producer:
     build: .
-    image: spark-app:latest
-    container_name: spark-app
+    image: spark-app-producer:latest
+    container_name: spark-app-producer
     depends_on:
       - docker-mysql
       - redis
+      - kafka
+      - schema-registry
     environment:
-      - SPARK_APPLICATION_MAIN_CLASS=com.giatsidis.spark.Main
+      - SPARK_APPLICATION_MAIN_CLASS=com.giatsidis.spark.KafkaAvroProducer
+      - SPARK_MASTER=spark://spark-master:7077
+      - ENABLE_INIT_DAEMON=false
+  spark-app-consumer:
+    build: .
+    image: spark-app-consumer:latest
+    container_name: spark-app-consumer
+    depends_on:
+      - docker-mysql
+      - redis
+      - kafka
+      - schema-registry
+    environment:
+      - SPARK_APPLICATION_MAIN_CLASS=com.giatsidis.spark.KafkaAvroConsumer
       - SPARK_MASTER=spark://spark-master:7077
       - ENABLE_INIT_DAEMON=false
   spark-master:
@@ -25,7 +40,7 @@ services:
     depends_on:
       - spark-master
     ports:
-      - "8081:8081"
+      - "8082:8081"
     environment:
       - "SPARK_MASTER=spark://spark-master:7077"
       - ENABLE_INIT_DAEMON_STEP=false
@@ -35,10 +50,45 @@ services:
     depends_on:
       - spark-master
     ports:
-      - "8082:8081"
+      - "8083:8081"
     environment:
       - "SPARK_MASTER=spark://spark-master:7077"
       - ENABLE_INIT_DAEMON_STEP=false
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    restart: always
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_SERVERS: "zookeeper:22888:23888"
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - 9092:9092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  schema-registry:
+    image: confluentinc/cp-schema-registry:latest
+    container_name: schema-registry
+    depends_on:
+      - kafka
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "kafka:29092"
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
   docker-mysql:
     image: mysql:5.7
     container_name: docker-mysql
