@@ -8,7 +8,7 @@ import com.giatsidis.spark.utils.{Helpers, OAuthUtils}
 import io.confluent.kafka.serializers.KafkaAvroSerializer
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 import org.apache.kafka.common.serialization.StringSerializer
-import org.apache.spark.SparkConf
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.streaming.twitter.TwitterUtils
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 
@@ -16,8 +16,13 @@ object KafkaAvroProducer {
 
   def main(args: Array[String]): Unit = {
     OAuthUtils.init()
-    val sparkConf = new SparkConf().setAppName(this.getClass.getSimpleName).setMaster("local[*]")
-    val streamingContext = new StreamingContext(sparkConf, Seconds(Config.streamingBatchDuration))
+
+    val sparkSession = SparkSession.builder
+      .master(sys.env.getOrElse("SPARK_MASTER", "local[*]"))
+      .appName(this.getClass.getSimpleName)
+      .getOrCreate()
+
+    val streamingContext = new StreamingContext(sparkSession.sparkContext, Seconds(Config.streamingBatchDuration))
     streamingContext.sparkContext.setLogLevel("ERROR")
     val filters = Array("Bitcoin", "BTC", "Ethereum", "ETH", "XRP", "Tether", "Litecoin");
 
