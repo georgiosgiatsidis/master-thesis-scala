@@ -25,6 +25,7 @@ object MysqlService {
         url,
         Config.dbUsername,
         Config.dbPassword,
+        driver = "com.mysql.jdbc.Driver"
       )
 
       try {
