@@ -13,10 +13,9 @@ import org.apache.spark.streaming.twitter.TwitterUtils
 object Main {
   def main(args: Array[String]): Unit = {
     OAuthUtils.init()
-    val sparkConf = new SparkConf().setAppName(this.getClass.getSimpleName).setMaster("local[*]")
-    val master = sys.env.getOrElse("SPARK_MASTER", "local[*]")
+    
     val sparkSession = SparkSession.builder
-      .master(master)
+      .master(sys.env.getOrElse("SPARK_MASTER", "local[*]"))
       .appName(this.getClass.getSimpleName)
       .getOrCreate()
 
