@@ -8,6 +8,7 @@ services:
       - docker-mysql
       - redis
     environment:
+      - SPARK_APPLICATION_MAIN_CLASS=com.giatsidis.spark.Main
       - SPARK_MASTER=spark://spark-master:7077
       - ENABLE_INIT_DAEMON=false
   spark-master:
