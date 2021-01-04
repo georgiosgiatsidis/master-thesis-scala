@@ -31,5 +31,10 @@ libraryDependencies ++= Seq(
   "io.confluent" % "kafka-avro-serializer" % "6.0.1",
 )
 
+assemblyMergeStrategy in assembly := {
+  case PathList("META-INF", xs@_*) => MergeStrategy.discard
+  case x => MergeStrategy.first
+}
+
 avroStringType := "String"
 (Compile / avroGenerate / target) := (Compile / sourceManaged).value
