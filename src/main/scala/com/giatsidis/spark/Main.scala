@@ -5,7 +5,7 @@ import com.giatsidis.spark.sentiment.mllib.MLlibSentimentAnalyzer
 import com.giatsidis.spark.sentiment.stanford.StanfordSentimentAnalyzer
 import com.giatsidis.spark.services.{MysqlService, RedisService}
 import com.giatsidis.spark.utils.{Helpers, OAuthUtils, TextUtils}
-import org.apache.spark.SparkConf
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.Seconds
 import org.apache.spark.streaming.twitter.TwitterUtils
@@ -14,8 +14,17 @@ object Main {
   def main(args: Array[String]): Unit = {
     OAuthUtils.init()
     val sparkConf = new SparkConf().setAppName(this.getClass.getSimpleName).setMaster("local[*]")
-    val streamingContext = new StreamingContext(sparkConf, Seconds(Config.streamingBatchDuration))
+    val master = sys.env.getOrElse("SPARK_MASTER", "local[*]")
+    val sparkSession = SparkSession.builder
+      .master(master)
+      .appName(this.getClass.getSimpleName)
+      .getOrCreate()
+
+    val sparkContext = sparkSession.sparkContext
+
+    val streamingContext = new StreamingContext(sparkContext, Seconds(Config.streamingBatchDuration))
     streamingContext.sparkContext.setLogLevel("ERROR")
+    streamingContext.checkpoint(Config.checkpointDirectory)
     val filters = Array("Bitcoin", "BTC", "Ethereum", "ETH", "XRP", "Tether", "Litecoin");
     val tweets = TwitterUtils.createStream(streamingContext, None, filters)
     //    val model = MLlibSentimentAnalyzer.createNBModel(streamingContext.sparkContext)
