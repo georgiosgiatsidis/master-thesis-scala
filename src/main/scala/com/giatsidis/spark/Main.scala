@@ -1,5 +1,6 @@
 package com.giatsidis.spark
 
+import com.giatsidis.repositories.TermRepository
 import com.giatsidis.spark.models.{Hashtag, Tweet, User}
 import com.giatsidis.spark.sentiment.mllib.MLlibSentimentAnalyzer
 import com.giatsidis.spark.sentiment.stanford.StanfordSentimentAnalyzer
@@ -10,10 +11,15 @@ import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.Seconds
 import org.apache.spark.streaming.twitter.TwitterUtils
 
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+
 object Main {
   def main(args: Array[String]): Unit = {
     OAuthUtils.init()
-    
+
+    val terms = Await.result(TermRepository.getAll(), Duration.Inf)
+
     val sparkSession = SparkSession.builder
       .master(sys.env.getOrElse("SPARK_MASTER", "local[*]"))
       .appName(this.getClass.getSimpleName)
@@ -24,8 +30,8 @@ object Main {
     val streamingContext = new StreamingContext(sparkContext, Seconds(Config.streamingBatchDuration))
     streamingContext.sparkContext.setLogLevel("ERROR")
     streamingContext.checkpoint(Config.checkpointDirectory)
-    val filters = Array("Bitcoin", "BTC", "Ethereum", "ETH", "XRP", "Tether", "Litecoin");
-    val tweets = TwitterUtils.createStream(streamingContext, None, filters)
+    val filters = Helpers.getKeywordsFromTerms(terms);
+    val tweets = TwitterUtils.createStream(streamingContext, None, filters.toArray)
     //    val model = MLlibSentimentAnalyzer.createNBModel(streamingContext.sparkContext)
 
     tweets.foreachRDD { rdd =>
