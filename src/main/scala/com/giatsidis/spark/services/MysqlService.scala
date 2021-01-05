@@ -43,6 +43,7 @@ object MysqlService {
                 TextUtils.remove4ByteChars(record.fullText),
                 record.location,
                 record.sentiment,
+                record.sentimentML,
                 record.createdAt,
                 Option(record.user.id)
               )

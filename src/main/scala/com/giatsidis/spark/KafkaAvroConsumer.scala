@@ -5,6 +5,7 @@ import java.time.Instant
 import collection.JavaConverters._
 import com.giatsidis.avro.Status
 import com.giatsidis.spark.models.{Hashtag, Tweet, User}
+import com.giatsidis.spark.sentiment.mllib.MLlibSentimentAnalyzer
 import com.giatsidis.spark.sentiment.stanford.StanfordSentimentAnalyzer
 import com.giatsidis.spark.services.{MysqlService, RedisService}
 import io.confluent.kafka.serializers.KafkaAvroDeserializer
@@ -40,13 +41,15 @@ object KafkaAvroConsumer {
 
     val topics = Array(Config.kafkaTopic)
 
-    val dStream = KafkaUtils.createDirectStream[String, Status](
+    val tweets = KafkaUtils.createDirectStream[String, Status](
       streamingContext,
       PreferConsistent,
       Subscribe[String, Status](topics, clientParams)
     )
 
-    dStream.foreachRDD { rdd =>
+    val model = MLlibSentimentAnalyzer.createNBModel(streamingContext.sparkContext)
+
+    tweets.foreachRDD { rdd =>
       val savedRdd = rdd
         .map { rdd: ConsumerRecord[String, Status] =>
           Tweet(
@@ -54,6 +57,7 @@ object KafkaAvroConsumer {
             rdd.value.getFullText,
             Option(rdd.value.getLocation),
             StanfordSentimentAnalyzer.detectSentiment(rdd.value.getFullText).toString,
+            MLlibSentimentAnalyzer.detectSentiment(rdd.value.getFullText, model).toString,
             Instant.parse(rdd.value.getCreatedAt),
             rdd.value.getHashtags.asScala.toList
               .map(h => Hashtag(h.getText)),

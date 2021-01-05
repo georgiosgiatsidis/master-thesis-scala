@@ -7,6 +7,7 @@ case class Tweet(
                   fullText: String,
                   location: Option[String],
                   sentiment: String,
+                  sentimentML: String,
                   createdAt: Instant,
                   hashtags: List[Hashtag],
                   user: User,

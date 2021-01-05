@@ -33,6 +33,8 @@ object Tables extends JdbcProfile {
 
     def sentiment: Rep[String] = column[String]("sentiment")
 
+    def sentimentML: Rep[String] = column[String]("sentimentML")
+
     def createdAt: Rep[Instant] = column[Instant]("createdAt")
 
     def userId: Rep[Option[Long]] = column[Option[Long]]("userId")
@@ -41,7 +43,7 @@ object Tables extends JdbcProfile {
       foreignKey("tweets_ibfk_1", userId, users)(_.id.?, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
 
     def * : ProvenShape[Tweet] =
-      (id, fullText, location, sentiment, createdAt, userId) <> (Tweet.tupled, Tweet.unapply)
+      (id, fullText, location, sentiment, sentimentML, createdAt, userId) <> (Tweet.tupled, Tweet.unapply)
   }
 
   val tweets = TableQuery[Tweets]

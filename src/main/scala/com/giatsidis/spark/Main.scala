@@ -32,21 +32,20 @@ object Main {
     streamingContext.checkpoint(Config.checkpointDirectory)
     val filters = Helpers.getKeywordsFromTerms(terms);
     val tweets = TwitterUtils.createStream(streamingContext, None, filters.toArray)
-    //    val model = MLlibSentimentAnalyzer.createNBModel(streamingContext.sparkContext)
+    val model = MLlibSentimentAnalyzer.createNBModel(streamingContext.sparkContext)
 
     tweets.foreachRDD { rdd =>
       val savedRdd =
         Helpers.applyFilters(rdd)
           .map(status => {
-            val cleanedText = TextUtils.cleanText(status.getText)
             Tweet(
               status.getId,
               status.getText,
               Option(status.getGeoLocation).map(geo => {
                 s"${geo.getLatitude},${geo.getLongitude}"
               }),
-              StanfordSentimentAnalyzer.detectSentiment(cleanedText).toString,
-              //            MLlibSentimentAnalyzer.detectSentiment(status.getText, model).toString,
+              StanfordSentimentAnalyzer.detectSentiment(status.getText).toString,
+              MLlibSentimentAnalyzer.detectSentiment(status.getText, model).toString,
               status.getCreatedAt.toInstant,
               status.getHashtagEntities.toList
                 .filter(h => filters.map(_.toLowerCase).contains(h.getText.toLowerCase))
