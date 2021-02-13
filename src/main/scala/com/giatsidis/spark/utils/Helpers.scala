@@ -10,7 +10,8 @@ object Helpers {
       .filter(_.getLang == "en")
       .filter(!_.isRetweet)
       .filter(_.getHashtagEntities.toList.length < 5)
-      .filter(_.getText.length > 20)
+      .filter(_.getText.length > 50)
+      .filter(_.getUser.getFollowersCount > 200)
   }
 
   def getKeywordsFromTerms(terms: List[Term]): List[String] = {
