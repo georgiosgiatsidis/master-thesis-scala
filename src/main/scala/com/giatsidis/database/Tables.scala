@@ -1,7 +1,8 @@
-package com.giatsidis.spark.database
+package com.giatsidis.database
 
 import java.time.Instant
 
+import com.giatsidis.database.models.{Hashtag, Tweet, User}
 import slick.jdbc.JdbcProfile
 import slick.lifted.{ForeignKeyQuery, ProvenShape}
 

@@ -1,4 +1,4 @@
-package com.giatsidis.spark.database
+package com.giatsidis.database.models
 
 import java.time.Instant
 

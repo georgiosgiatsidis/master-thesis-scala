@@ -3,6 +3,7 @@ package com.giatsidis.spark.sentiment.stanford
 import java.util.Properties
 
 import com.giatsidis.spark.sentiment.{NEGATIVE, NEUTRAL, NOT_UNDERSTOOD, POSITIVE, SentimentType, VERY_NEGATIVE, VERY_POSITIVE}
+import com.giatsidis.spark.utils.TextUtils
 
 import collection.JavaConverters._
 import edu.stanford.nlp.ling.CoreAnnotations
@@ -22,7 +23,7 @@ object StanfordSentimentAnalyzer {
 
   def detectSentiment(message: String): SentimentType = {
 
-    val annotation: Annotation = pipeline.process(message)
+    val annotation: Annotation = pipeline.process(TextUtils.cleanText(message))
     var sentiments: ListBuffer[Double] = ListBuffer()
     var sizes: ListBuffer[Int] = ListBuffer()
 
@@ -42,17 +43,13 @@ object StanfordSentimentAnalyzer {
       }
       sentiments += sentiment.toDouble
       sizes += partText.length
-      //      println("debug: " + sentiment)
-      //      println("size: " + partText.length)
-
     })
 
-    /*
+
     val averageSentiment: Double = {
       if (sentiments.nonEmpty) sentiments.sum / sentiments.size
       else -1
     }
-     */
 
     val weightedSentiments = (sentiments, sizes).zipped.map((sentiment, size) => sentiment * size)
     var weightedSentiment = weightedSentiments.sum / sizes.sum
@@ -61,11 +58,6 @@ object StanfordSentimentAnalyzer {
       mainSentiment = -1
       weightedSentiment = -1
     }
-
-
-    //    println("debug: main: " + mainSentiment)
-    //    println("debug: avg: " + averageSentiment)
-    //    println("debug: weighted: " + weightedSentiment)
 
     weightedSentiment match {
       case s if s <= 0.0 => NOT_UNDERSTOOD
@@ -76,7 +68,6 @@ object StanfordSentimentAnalyzer {
       case s if s < 5.0 => VERY_POSITIVE
       case s if s > 5.0 => NOT_UNDERSTOOD
     }
-
   }
 
 }
