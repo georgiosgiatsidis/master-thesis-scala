@@ -1,7 +1,7 @@
 package com.giatsidis.spark
 
 import com.giatsidis.repositories.TermRepository
-import com.giatsidis.spark.models.{Hashtag, Tweet, User}
+import com.giatsidis.spark.models.{Hashtag, Tweet, User, Term}
 import com.giatsidis.spark.sentiment.mllib.MLlibSentimentAnalyzer
 import com.giatsidis.spark.sentiment.stanford.StanfordSentimentAnalyzer
 import com.giatsidis.spark.services.{MysqlService, RedisService}
@@ -51,9 +51,10 @@ object Main {
                 .filter(h => filters.map(_.toLowerCase).contains(h.getText.toLowerCase))
                 .map(h => Hashtag(h.getText)),
               User(status.getUser.getId, status.getUser.getScreenName, status.getUser.getProfileImageURLHttps),
-              filters.toList.filter(f => {
-                status.getText.toLowerCase.contains(f.toLowerCase())
-              })
+              terms.filter { term =>
+                val keywords = term.keywords.split(",")
+                keywords.exists(keyword => status.getText.toLowerCase.contains(keyword.toLowerCase()))
+              }.map(t => Term(t.id.get, t.name))
             )
           })
 

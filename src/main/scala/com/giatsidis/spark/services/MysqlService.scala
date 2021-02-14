@@ -1,8 +1,9 @@
 package com.giatsidis.spark.services
 
 import com.giatsidis.spark.Config
-import com.giatsidis.database.Tables.{Hashtags, TweetHashtag, TweetHashtags, Tweets, Users}
+import com.giatsidis.database.Tables.{Hashtags, TweetHashtag, TweetHashtags, TweetTerm, TweetTerms, Tweets, Users}
 import com.giatsidis.database.models.{Hashtag => HashtagRow, Tweet => TweetRow, User => UserRow}
+import com.giatsidis.repositories.TermRepository
 import com.giatsidis.spark.models.Tweet
 import com.giatsidis.spark.utils.TextUtils
 import org.apache.log4j.{Level, Logger}
@@ -18,6 +19,8 @@ object MysqlService {
   log.setLevel(Level.INFO)
 
   def save(rdd: RDD[Tweet]): Unit = {
+    val terms = Await.result(TermRepository.getAll(), Duration.Inf)
+
     rdd.foreachPartition(partition => {
       val url = s"jdbc:mysql://${Config.dbHost}:${Config.dbPort}/${Config.dbName}?serverTimezone=UTC&useUnicode=true&characterEncoding=UTF-8&useSSL=false";
 
@@ -49,6 +52,11 @@ object MysqlService {
               )
 
             Await.result(db.run(tweetsQuery), Duration.Inf)
+
+            record.categories.foreach { category =>
+              val tweetTermQuery = TableQuery[TweetTerms] += TweetTerm(0, record.id, category.id)
+              Await.result(db.run(tweetTermQuery), Duration.Inf)
+            }
 
             record.hashtags.foreach(hashtag => {
               val hashtagsQuery = TableQuery[Hashtags].insertOrUpdate(HashtagRow(0, hashtag.text))
