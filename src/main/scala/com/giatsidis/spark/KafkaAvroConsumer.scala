@@ -4,7 +4,8 @@ import java.time.Instant
 
 import collection.JavaConverters._
 import com.giatsidis.avro.Status
-import com.giatsidis.spark.models.{Hashtag, Tweet, User}
+import com.giatsidis.repositories.TermRepository
+import com.giatsidis.spark.models.{Hashtag, Term, Tweet, User}
 import com.giatsidis.spark.sentiment.mllib.MLlibSentimentAnalyzer
 import com.giatsidis.spark.sentiment.stanford.StanfordSentimentAnalyzer
 import com.giatsidis.spark.services.{MysqlService, RedisService}
@@ -16,6 +17,9 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.streaming.kafka010._
 import org.apache.spark.streaming.kafka010.LocationStrategies.PreferConsistent
 import org.apache.spark.streaming.kafka010.ConsumerStrategies.Subscribe
+
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 object KafkaAvroConsumer {
   def main(args: Array[String]): Unit = {
@@ -49,6 +53,8 @@ object KafkaAvroConsumer {
 
     val model = MLlibSentimentAnalyzer.createNBModel(streamingContext.sparkContext)
 
+    val terms = Await.result(TermRepository.getAll(), Duration.Inf)
+
     tweets.foreachRDD { rdd =>
       val savedRdd = rdd
         .map { rdd: ConsumerRecord[String, Status] =>
@@ -66,7 +72,10 @@ object KafkaAvroConsumer {
               rdd.value.getUser.getScreenName,
               rdd.value.getUser.getProfileImageHttps,
             ),
-            List()
+            terms.filter { term =>
+              val keywords = term.keywords.split(",")
+              keywords.exists(keyword => rdd.value.getFullText.toLowerCase.contains(keyword.toLowerCase()))
+            }.map(t => Term(t.id.get, t.name))
           )
         }
 
