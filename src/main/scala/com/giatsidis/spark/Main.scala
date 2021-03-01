@@ -34,6 +34,8 @@ object Main {
     val tweets = TwitterUtils.createStream(streamingContext, None, filters.toArray)
     val model = MLlibSentimentAnalyzer.createNBModel(streamingContext.sparkContext)
 
+    Helpers.topHashtags(tweets)
+
     tweets.foreachRDD { rdd =>
       val savedRdd =
         Helpers.applyFilters(rdd)
