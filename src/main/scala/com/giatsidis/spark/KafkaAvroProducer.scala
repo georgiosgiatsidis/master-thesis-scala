@@ -34,6 +34,8 @@ object KafkaAvroProducer {
 
     val tweets = TwitterUtils.createStream(streamingContext, None, filters)
 
+    Helpers.topHashtags(tweets)
+
     tweets.foreachRDD { rdd =>
       val savedRdd = Helpers.applyFilters(rdd)
 
