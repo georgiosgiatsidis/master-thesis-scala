@@ -1,6 +1,10 @@
 package com.giatsidis.spark.utils
 
+import scala.io.Source
+
 object TextUtils {
+  val stopWordsList = Source.fromInputStream(getClass.getResourceAsStream("/" + "stopwords.txt")).getLines().toList
+
   def cleanText(input: String): String = {
     input.toLowerCase()
       .replaceAll("\n", "")
@@ -14,6 +18,9 @@ object TextUtils {
       .replaceAll("(?:https?|http?)//[\\w/%.-]+\\s+", "")
       .replaceAll("(?:https?|http?)//[\\w/%.-]+", "")
       .replaceAll("[^ 'a-zA-Z0-9,.?!]", "") // keep only chars in the list
+      .split("\\W+") // convert to array
+      .filter(!stopWordsList.contains(_)) // remove stop words
+      .fold("")((a,b) => a.trim + " " + b.trim).trim // trim
   }
 
   def remove4ByteChars(input: String): String = {
