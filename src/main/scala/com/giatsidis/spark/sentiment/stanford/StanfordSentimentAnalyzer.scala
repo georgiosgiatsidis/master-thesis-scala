@@ -23,7 +23,7 @@ object StanfordSentimentAnalyzer {
 
   def detectSentiment(message: String): SentimentType = {
 
-    val annotation: Annotation = pipeline.process(TextUtils.cleanText(message))
+    val annotation: Annotation = pipeline.process(TextUtils.cleanText(message, false))
     var sentiments: ListBuffer[Double] = ListBuffer()
     var sizes: ListBuffer[Int] = ListBuffer()
 

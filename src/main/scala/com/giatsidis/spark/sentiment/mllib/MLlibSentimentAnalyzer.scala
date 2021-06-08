@@ -8,7 +8,7 @@ import org.apache.spark.mllib.feature.HashingTF
 import org.apache.spark.mllib.linalg.Vector
 import org.apache.spark.mllib.regression.LabeledPoint
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.SparkContext
 
 
@@ -35,15 +35,19 @@ object MLlibSentimentAnalyzer {
     hashingTF.transform(text)
   }
 
-  def createNBModel(sc: SparkContext): NaiveBayesModel = {
-    val spark = SparkSession.builder.config(sc.getConf).getOrCreate()
-
-    val df = spark.read
+  def readSentimentFile(sparkSession: SparkSession): DataFrame = {
+    sparkSession.read
       .format("com.databricks.spark.csv")
       .option("header", "false")
       .option("inferSchema", "true")
       .load(Config.trainingDataFilePath)
       .toDF("polarity", "id", "date", "query", "user", "tweet")
+  }
+
+  def createNBModel(sc: SparkContext): NaiveBayesModel = {
+    val sparkSession = SparkSession.builder.config(sc.getConf).getOrCreate()
+
+    val df = readSentimentFile(sparkSession)
 
     val labeledRDD: RDD[LabeledPoint] = df.select("polarity", "tweet").rdd.map {
       case Row(polarity: Int, tweet: String) =>
