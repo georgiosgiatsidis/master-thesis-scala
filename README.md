@@ -18,11 +18,11 @@
 
 ## IntelliJ IDEA (optional)
 
-1. Download [IntelliJ](https://www.jetbrains.com/idea/download). from the official website
+1. Download [IntelliJ](https://www.jetbrains.com/idea/download) from the official website.
 2. Install the Scala plugin:  **File > Settings > Plugins.**
 3. Create a new project: **Projects > New Project from existing sources**.
 Then select **Import project from existing model > sbt**.
-After that, rename the project and make sure that the selected JDK version is 1.8. Moreover, check that the Scala version is 2.12.* and that the sbt version used is 1.4.4. Finally click finish.
+After that, rename the project and make sure that the selected JDK version is 1.8. Moreover, check that the Scala version is 2.12.* and that the *sbt* version used is 1.4.4. Finally, click finish.
 4. You are ready to go.
 
 ## Configuration and Execution
@@ -41,6 +41,8 @@ ACCESS_TOKEN_SECRET = ""
 
 ### MySQL
 Add MySQL credentials at [`application.conf`](src/main/resources/application.conf).
+Database tables should be created by running the migrations provided by RESTful API Service.
+(See: [`Restful API Service`](https://github.com/georgiosgiatsidis/master-thesis-api))
 ```
 DB_HOST = "localhost"
 DB_PORT = "3307"
@@ -66,7 +68,9 @@ KAFKA_TOPIC="tweets"
 AVRO_SCHEMA_REGISTRY_URL="http://localhost:8081"
 ```
 
-### Docker
+### Docker (optional)
+In order to avoid potential problems from different local environments, all services can be on docker containers.
+
 Run the docker enviroment via docker-compose.
 ```sh
 docker-compose up --build
